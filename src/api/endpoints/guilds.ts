@@ -11,37 +11,29 @@ export async function listGuilds(): Promise<Guild[]> {
   return structuredClone(getDb().guilds);
 }
 
-export async function updateGuild(input: {
+export interface UpdateGuildInput {
   guildId: string;
+  name: string;
   channelId: string;
+  channels: Guild["channels"];
+  /** Write-only. Omitted when unchanged; never read back. */
   mirrorWebhook?: string;
-}): Promise<Guild> {
+}
+
+export async function updateGuild(input: UpdateGuildInput): Promise<Guild> {
+  const { guildId, ...body } = input;
   if (!USE_MOCK) {
-    return request(`/api/guilds/${encodeURIComponent(input.guildId)}`, {
-      method: "PUT",
-      body: { channelId: input.channelId, mirrorWebhook: input.mirrorWebhook },
-    });
+    return request(`/api/guilds/${encodeURIComponent(guildId)}`, { method: "PUT", body });
   }
 
   await latency();
   requireSession();
-  const db = getDb();
-  const guild = db.guilds.find((g) => g.guildId === input.guildId);
-  if (!guild) throw new ApiError(404, "Server not found");
+  const guild = getDb().guilds.find((g) => g.guildId === guildId);
+  if (!guild) throw new ApiError(404, "Guild not found");
 
-  guild.channelId = input.channelId;
-  if (input.mirrorWebhook) {
-    // Write-only: stored server-side, never returned to the client.
-    db.mirrorSecrets[input.guildId] = "configured";
-    guild.mirrorConfigured = true;
-  }
+  guild.name = body.name;
+  guild.channelId = body.channelId;
+  guild.channels = structuredClone(body.channels);
+  if (body.mirrorWebhook) guild.mirrorConfigured = true;
   return structuredClone(guild);
-}
-
-export async function getInviteUrl(): Promise<{ url: string }> {
-  if (!USE_MOCK) return request("/api/guilds/invite-url");
-
-  await latency(150, 400);
-  requireSession();
-  return { url: getDb().inviteUrl };
 }
