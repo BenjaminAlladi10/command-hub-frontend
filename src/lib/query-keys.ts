@@ -20,6 +20,5 @@ export const queryKeys = {
   guilds: {
     all: () => ["guilds"] as const,
     list: () => ["guilds", "list"] as const,
-    inviteUrl: () => ["guilds", "invite-url"] as const,
   },
 } as const;
