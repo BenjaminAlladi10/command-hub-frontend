@@ -31,7 +31,7 @@ export function AppSidebar() {
   async function handleLogout() {
     await signOut();
     toast.success("Signed out");
-    void navigate({ to: "/login" });
+    void navigate({ to: "/login", search: { redirect: undefined } });
   }
 
   return (
