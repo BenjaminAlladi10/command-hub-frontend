@@ -7,7 +7,7 @@ import { EmptyState, ErrorState, TableSkeleton } from "@/components/common/State
 import { OnOff } from "@/components/common/Toggle";
 import { useCommands } from "@/hooks/useCommands";
 import { useGuilds } from "@/hooks/useGuilds";
-import { AI_TRIAGE_AVAILABLE, commandSlug } from "@/lib/constants";
+import { commandSlug } from "@/lib/constants";
 import type { CommandConfig } from "@/types";
 
 export const Route = createFileRoute("/_authenticated/commands/")({
@@ -94,9 +94,7 @@ function CommandList({ commands, guildId }: { commands: CommandConfig[]; guildId
                 <span className="text-sm text-muted-foreground">None</span>
               )}
             </Cell>
-            <Cell label="AI triage">
-              {AI_TRIAGE_AVAILABLE ? <OnOff on={c.rule.useAiTriage} /> : <span className="text-sm text-muted-foreground">Unavailable</span>}
-            </Cell>
+            <Cell label="AI triage"><OnOff on={c.rule.useAiTriage} /></Cell>
             <ChevronRight className="hidden size-4 text-muted-foreground group-hover:text-foreground md:block" aria-hidden="true" />
           </Link>
         </li>

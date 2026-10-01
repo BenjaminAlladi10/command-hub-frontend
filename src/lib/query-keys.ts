@@ -9,7 +9,7 @@ export const queryKeys = {
   },
   interactions: {
     all: () => ["interactions"] as const,
-    list: (filters: Omit<InteractionQuery, "cursor">) =>
+    list: (filters: Omit<InteractionQuery, "cursor" | "page">) =>
       ["interactions", "list", filters] as const,
     detail: (id: string) => ["interactions", "detail", id] as const,
   },

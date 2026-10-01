@@ -6,14 +6,18 @@ import { queryKeys } from "@/lib/query-keys";
 import type { InteractionQuery } from "@/types";
 
 export function useInteractions(
-  filters: Omit<InteractionQuery, "cursor" | "limit">,
+  filters: Omit<InteractionQuery, "cursor" | "limit" | "page">,
   pageSize: number = PAGE_SIZE,
 ) {
   return useInfiniteQuery({
     queryKey: queryKeys.interactions.list({ ...filters, limit: pageSize }),
     queryFn: ({ pageParam }) =>
-      interactionsApi.listInteractions({ ...filters, cursor: pageParam, limit: pageSize }),
-    initialPageParam: null as string | null,
+      interactionsApi.listInteractions({
+        ...filters,
+        page: Number(pageParam) || 1,
+        limit: pageSize,
+      }),
+    initialPageParam: "1",
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 }

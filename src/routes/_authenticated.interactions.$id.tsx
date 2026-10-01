@@ -92,6 +92,32 @@ function InteractionDetail() {
         />
       </Panel>
 
+      {i.aiSummary || (i.aiTags && i.aiTags.length > 0) ? (
+        <Panel title="AI triage">
+          <DetailList
+            items={[
+              ...(i.aiSummary
+                ? [{ label: "Summary", value: i.aiSummary }]
+                : []),
+              ...(i.aiTags && i.aiTags.length > 0
+                ? [{
+                    label: "Tags",
+                    value: (
+                      <span className="flex flex-wrap gap-1">
+                        {i.aiTags.map((tag) => (
+                          <span key={tag} className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">
+                            {tag}
+                          </span>
+                        ))}
+                      </span>
+                    ),
+                  }]
+                : []),
+            ]}
+          />
+        </Panel>
+      ) : null}
+
       <section aria-labelledby="actions-heading">
         <h2 id="actions-heading" className="mb-3 text-sm font-semibold">Actions</h2>
         {i.actions.length === 0 ? (

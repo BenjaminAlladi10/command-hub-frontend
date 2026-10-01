@@ -1,12 +1,7 @@
 import { ApiError } from "@/lib/api-error";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
-
-/**
- * Mock mode is isolated in src/api/mock and only used for UI development.
- * Set VITE_USE_MOCK=false to talk to the real backend.
- */
-export const USE_MOCK = (import.meta.env.VITE_USE_MOCK ?? "true") !== "false";
+const isBrowser = typeof window !== "undefined";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (isBrowser ? "" : "http://localhost:3000");
 
 type UnauthorizedHandler = () => void;
 
@@ -23,7 +18,6 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
-/** Backend error envelope: { "error": { "code": string, "message": string } } */
 interface ErrorEnvelope {
   error?: { code?: string; message?: string };
 }

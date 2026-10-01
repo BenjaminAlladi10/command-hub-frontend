@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCommands } from "@/hooks/useCommands";
 import { useGuilds } from "@/hooks/useGuilds";
+import { commandSlug } from "@/lib/constants";
 
 export const Route = createFileRoute("/_authenticated/commands/$name")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -31,7 +32,7 @@ function CommandConfigPage() {
   const guildId = search.guildId ?? guilds.data?.[0]?.guildId;
   const guild = guilds.data?.find((g) => g.guildId === guildId);
   const commands = useCommands(guildId);
-  const command = commands.data?.find((c) => c.name === `/${name}`);
+  const command = commands.data?.find((c) => commandSlug(c.name) === name);
 
   const back = (
     <Button variant="ghost" size="sm" asChild className="-ml-2">

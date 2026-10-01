@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { DetailList, PageIntro, Panel } from "@/components/common/PageIntro";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { USE_MOCK } from "@/api";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTheme, type ThemeChoice } from "@/providers/ThemeProvider";
 
@@ -29,8 +28,8 @@ function SettingsPage() {
         <DetailList
           items={[
             { label: "Email", value: user?.email },
-            { label: "Session", value: "Secure session cookie" },
-            { label: "Data source", value: USE_MOCK ? "Development mock data" : "Command Hub API" },
+            { label: "User ID", value: user?.id },
+            { label: "Session", value: "HTTP-only session cookie" },
           ]}
         />
       </Panel>

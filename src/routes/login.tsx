@@ -6,7 +6,6 @@ import { FieldError } from "@/components/common/Toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { USE_MOCK } from "@/api";
 import { ApiError, toMessage } from "@/lib/api-error";
 import { fieldErrors, loginSchema } from "@/schemas";
 import { useAuth } from "@/providers/AuthProvider";
@@ -113,12 +112,6 @@ function LoginPage() {
             {submitting ? "Signing in…" : "Sign in"}
           </Button>
         </form>
-
-        {USE_MOCK ? (
-          <p className="mt-6 rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-            Development mock mode — any email with password <span className="font-mono">admin123</span>.
-          </p>
-        ) : null}
       </div>
     </main>
   );

@@ -1,58 +1,69 @@
-import { request, USE_MOCK } from "@/api/client";
-import { getDb, latency, maybeFail, requireSession } from "@/api/mock/store";
-import { ApiError } from "@/lib/api-error";
-import { PAGE_SIZE } from "@/lib/constants";
+import { request } from "@/api/client";
+import { asInteraction } from "@/api/normalize";
+import { PAGE_SIZE, commandSlug } from "@/lib/constants";
 import type { Interaction, InteractionPage, InteractionQuery } from "@/types";
 
-function buildSearch(query: InteractionQuery): string {
-  const params = new URLSearchParams();
-  if (query.cursor) params.set("cursor", query.cursor);
-  if (query.limit) params.set("limit", String(query.limit));
-  if (query.status && query.status !== "all") params.set("status", query.status);
-  if (query.command) params.set("command", query.command);
-  if (query.guildId) params.set("guildId", query.guildId);
-  if (query.q) params.set("q", query.q);
-  const search = params.toString();
-  return search ? `?${search}` : "";
+interface BackendInteractionPage {
+  data: Interaction[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}
+
+function matchesFilters(item: Interaction, query: InteractionQuery): boolean {
+  if (query.status && query.status !== "all" && item.status !== query.status) return false;
+  if (query.command && commandSlug(item.command) !== commandSlug(query.command)) return false;
+  if (query.guildId && item.guildId !== query.guildId) return false;
+  const needle = query.q?.trim().toLowerCase();
+  if (needle) {
+    const haystack = `${item.text} ${item.username} ${item.id}`.toLowerCase();
+    if (!haystack.includes(needle)) return false;
+  }
+  return true;
+}
+
+function hasClientFilters(query: InteractionQuery): boolean {
+  return Boolean(
+    (query.status && query.status !== "all") || query.command || query.guildId || query.q?.trim(),
+  );
+}
+
+async function fetchPage(page: number, limit: number): Promise<BackendInteractionPage> {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  return request(`/api/interactions?${params.toString()}`);
 }
 
 export async function listInteractions(query: InteractionQuery): Promise<InteractionPage> {
-  if (!USE_MOCK) return request(`/api/interactions${buildSearch(query)}`);
-
-  await latency();
-  requireSession();
-  maybeFail(0.03);
-
+  const page = query.page && query.page > 0 ? query.page : 1;
   const limit = query.limit ?? PAGE_SIZE;
-  const needle = query.q?.trim().toLowerCase();
 
-  const filtered = getDb()
-    .interactions.filter((i) => {
-      if (query.status && query.status !== "all" && i.status !== query.status) return false;
-      if (query.command && i.command !== query.command) return false;
-      if (query.guildId && i.guildId !== query.guildId) return false;
-      if (needle) {
-        const haystack = `${i.text} ${i.username} ${i.id}`.toLowerCase();
-        if (!haystack.includes(needle)) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
+  if (!hasClientFilters(query)) {
+    const payload = await fetchPage(page, limit);
+    return {
+      items: payload.data.map(asInteraction),
+      nextCursor: payload.pagination.page < payload.pagination.totalPages ? String(payload.pagination.page + 1) : null,
+    };
+  }
 
-  const start = query.cursor ? filtered.findIndex((i) => i.id === query.cursor) + 1 : 0;
+  // Express list endpoint ignores filter query params; apply them after fetch.
+  const collected: Interaction[] = [];
+  let backendPage = 1;
+  let totalPages = 1;
+  do {
+    const payload = await fetchPage(backendPage, 100);
+    totalPages = Math.max(payload.pagination.totalPages, 1);
+    collected.push(...payload.data.map(asInteraction));
+    backendPage += 1;
+  } while (backendPage <= totalPages);
+
+  const filtered = collected.filter((item) => matchesFilters(item, query));
+  const start = (page - 1) * limit;
   const items = filtered.slice(start, start + limit);
-  const nextCursor =
-    start + limit < filtered.length ? (items[items.length - 1]?.id ?? null) : null;
-
-  return { items: structuredClone(items), nextCursor };
+  return {
+    items,
+    nextCursor: start + limit < filtered.length ? String(page + 1) : null,
+  };
 }
 
 export async function getInteraction(id: string): Promise<Interaction> {
-  if (!USE_MOCK) return request(`/api/interactions/${encodeURIComponent(id)}`);
-
-  await latency();
-  requireSession();
-  const found = getDb().interactions.find((i) => i.id === id);
-  if (!found) throw new ApiError(404, "Interaction not found");
-  return structuredClone(found);
+  const payload = await request<Interaction>(`/api/interactions/${encodeURIComponent(id)}`);
+  return asInteraction(payload);
 }

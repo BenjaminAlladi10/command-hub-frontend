@@ -17,12 +17,6 @@ export const ACTION_STATUS_LABEL: Record<ActionStatus, string> = {
   retrying: "Retrying",
 };
 
-/**
- * The backend stores the AI triage flag but does not run triage yet.
- * Flip to true once the backend implements it.
- */
-export const AI_TRIAGE_AVAILABLE = false;
-
 export const PAGE_SIZE = 25;
 export const SEARCH_DEBOUNCE_MS = 300;
 

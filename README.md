@@ -1,24 +1,31 @@
 # Command Hub
 
-Implement exactly the screenshot and nothing else
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/738f5faa-3dec-4cb7-a076-7f42f0800c48).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+React admin dashboard for Command Hub. It monitors Discord slash-command interactions and lets administrators configure commands and guilds against the existing Express backend.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+You need Node.js 20+ and npm.
 
 ```sh
 git clone <this-repository-url>
-cd <repository-name>
+cd command-hub-frontend
 npm i
 npm run dev
 ```
+
+By default the app calls the Express backend. The Vite dev server proxies `/api` to `http://localhost:3000`.
+
+```sh
+npm run dev
+```
+
+Start the Express backend separately on port 3000. The dashboard talks to it through the `/api` proxy — there is no mock data layer.
+
+## Scripts
+
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite / TanStack Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run ESLint |

@@ -1,10 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** Base URL of the Command Hub backend. Empty = same origin. */
+  /** Base URL of the Command Hub backend. Empty in the browser = Vite proxy to localhost:3000. */
   readonly VITE_API_BASE_URL?: string;
-  /** "false" to call the real backend; anything else uses the isolated mock layer. */
-  readonly VITE_USE_MOCK?: string;
 }
 
 interface ImportMeta {

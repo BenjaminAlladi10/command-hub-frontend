@@ -52,9 +52,14 @@ export function GuildForm({ guild }: { guild: Guild }) {
       return;
     }
     setErrors({});
-    const { mirrorWebhook, ...rest } = parsed.data;
+    const { mirrorWebhook, channelId, ...rest } = parsed.data;
     mutation.mutate(
-      { guildId: guild.guildId, ...rest, ...(mirrorWebhook ? { mirrorWebhook } : {}) },
+      {
+        guildId: guild.guildId,
+        ...rest,
+        channelId: channelId || null,
+        ...(mirrorWebhook ? { mirrorWebhook } : {}),
+      },
       {
         onSuccess: () => {
           setValues((v) => ({ ...v, mirrorWebhook: "" }));
@@ -92,7 +97,7 @@ export function GuildForm({ guild }: { guild: Guild }) {
         <div className="space-y-4 p-4">
           <div>
             <Label htmlFor="channelId">Selected channel</Label>
-            <Select value={values.channelId} onValueChange={(v) => setValues((s) => ({ ...s, channelId: v }))}>
+            <Select value={values.channelId || undefined} onValueChange={(v) => setValues((s) => ({ ...s, channelId: v }))}>
               <SelectTrigger id="channelId" className="mt-1.5 sm:w-72" aria-invalid={Boolean(errors.channelId)} aria-describedby="channelId-error">
                 <SelectValue placeholder="Choose a channel" />
               </SelectTrigger>
@@ -108,7 +113,12 @@ export function GuildForm({ guild }: { guild: Guild }) {
           <div>
             <p className="text-sm font-medium">Available channels</p>
             <ul className="mt-2 divide-y divide-border rounded-md border border-border">
-              {values.channels.map((c) => (
+              {values.channels.length === 0 ? (
+                <li className="px-3 py-4 text-sm text-muted-foreground">
+                  No channels stored yet. Add a Discord channel ID to select a reply channel.
+                </li>
+              ) : (
+                values.channels.map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
                   <span className="min-w-0 truncate">
                     <span className="font-mono text-[13px]">{c.name}</span>
@@ -118,7 +128,8 @@ export function GuildForm({ guild }: { guild: Guild }) {
                     <X className="size-3.5" />
                   </Button>
                 </li>
-              ))}
+                ))
+              )}
             </ul>
             <FieldError id="channels-error" message={errors.channels} />
             <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">

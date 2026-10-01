@@ -1,15 +1,13 @@
-import { request, USE_MOCK } from "@/api/client";
-import { getDb, latency, requireSession } from "@/api/mock/store";
-import { ApiError } from "@/lib/api-error";
+import { request } from "@/api/client";
+import { asCommand } from "@/api/normalize";
 import { commandSlug } from "@/lib/constants";
 import type { CommandConfig } from "@/types";
 
 export async function listCommands(guildId: string): Promise<CommandConfig[]> {
-  if (!USE_MOCK) return request(`/api/commands?guildId=${encodeURIComponent(guildId)}`);
-
-  await latency();
-  requireSession();
-  return structuredClone(getDb().commands.filter((c) => c.guildId === guildId));
+  const payload = await request<Array<Omit<CommandConfig, "guildId"> & { guildId?: string }>>(
+    `/api/commands?guildId=${encodeURIComponent(guildId)}`,
+  );
+  return payload.map((command) => asCommand(command, guildId));
 }
 
 export interface UpdateCommandInput {
@@ -20,20 +18,9 @@ export interface UpdateCommandInput {
 }
 
 export async function updateCommand(input: UpdateCommandInput): Promise<CommandConfig> {
-  if (!USE_MOCK) {
-    return request(
-      `/api/commands/${encodeURIComponent(commandSlug(input.name))}?guildId=${encodeURIComponent(input.guildId)}`,
-      { method: "PUT", body: { enabled: input.enabled, rule: input.rule } },
-    );
-  }
-
-  await latency();
-  requireSession();
-  const existing = getDb().commands.find(
-    (c) => c.guildId === input.guildId && c.name === input.name,
+  const payload = await request<Omit<CommandConfig, "guildId"> & { guildId?: string }>(
+    `/api/commands/${encodeURIComponent(commandSlug(input.name))}?guildId=${encodeURIComponent(input.guildId)}`,
+    { method: "PUT", body: { enabled: input.enabled, rule: input.rule } },
   );
-  if (!existing) throw new ApiError(404, "Command not found");
-  existing.enabled = input.enabled;
-  existing.rule = { ...input.rule, flagKeywords: [...input.rule.flagKeywords] };
-  return structuredClone(existing);
+  return asCommand(payload, input.guildId);
 }

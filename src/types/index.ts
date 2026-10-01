@@ -29,6 +29,8 @@ export interface Interaction {
   status: InteractionStatus;
   receivedAt: string;
   actions: Action[];
+  aiSummary?: string | null;
+  aiTags?: string[];
 }
 
 export interface CommandRule {
@@ -71,6 +73,7 @@ export interface Stats {
 
 export interface InteractionQuery {
   cursor?: string | null;
+  page?: number;
   limit?: number;
   status?: InteractionStatus | "all";
   command?: string;

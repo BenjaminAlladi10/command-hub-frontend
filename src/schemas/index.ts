@@ -9,31 +9,31 @@ export type LoginValues = z.infer<typeof loginSchema>;
 
 export const commandFormSchema = z.object({
   enabled: z.boolean(),
-  replyTemplate: z
-    .string()
-    .trim()
-    .min(1, "A reply template is required")
-    .max(1000, "Keep the template under 1000 characters"),
+  replyTemplate: z.string().max(1000, "Keep the template under 1000 characters"),
   mirror: z.boolean(),
   flagKeywords: z.array(z.string().min(1)).max(25, "Up to 25 keywords"),
   useAiTriage: z.boolean(),
 });
 export type CommandFormValues = z.infer<typeof commandFormSchema>;
 
-export const guildFormSchema = z.object({
-  name: z.string().trim().min(1, "Guild name is required").max(100, "Up to 100 characters"),
-  channelId: z.string().min(1, "Choose a channel"),
-  channels: z
-    .array(z.object({ id: z.string().min(1), name: z.string().min(1) }))
-    .min(1, "Add at least one channel"),
-  mirrorWebhook: z
-    .string()
-    .trim()
-    .refine(
-      (value) => value === "" || WEBHOOK_PREFIXES.some((prefix) => value.startsWith(prefix)),
-      "Use a Discord webhook (https://discord.com/api/webhooks/…) or Slack incoming webhook (https://hooks.slack.com/…)",
-    ),
-});
+export const guildFormSchema = z
+  .object({
+    name: z.string().trim().min(1, "Guild name is required").max(100, "Up to 100 characters"),
+    channelId: z.string(),
+    channels: z.array(z.object({ id: z.string().min(1), name: z.string().min(1) })),
+    mirrorWebhook: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value === "" || WEBHOOK_PREFIXES.some((prefix) => value.startsWith(prefix)),
+        "Use a Discord webhook (https://discord.com/api/webhooks/…) or Slack incoming webhook (https://hooks.slack.com/…)",
+      ),
+  })
+  .superRefine((data, ctx) => {
+    if (data.channels.length > 0 && !data.channelId) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["channelId"], message: "Choose a channel" });
+    }
+  });
 export type GuildFormValues = z.infer<typeof guildFormSchema>;
 
 /** Flattens zod issues into { field: firstMessage }. */

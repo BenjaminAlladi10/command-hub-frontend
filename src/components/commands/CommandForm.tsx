@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateCommand } from "@/hooks/useCommands";
 import { toMessage } from "@/lib/api-error";
-import { AI_TRIAGE_AVAILABLE } from "@/lib/constants";
 import { commandFormSchema, fieldErrors, type CommandFormValues } from "@/schemas";
 import type { CommandConfig } from "@/types";
 
@@ -112,19 +111,9 @@ export function CommandForm({ command }: { command: CommandConfig }) {
           <ToggleField
             id="useAiTriage"
             label="AI triage"
-            description={
-              AI_TRIAGE_AVAILABLE
-                ? "Summarise and tag incoming messages automatically."
-                : "Not available yet — the backend does not run AI triage."
-            }
-            checked={AI_TRIAGE_AVAILABLE && values.useAiTriage}
+            description="Stored on this command. Command Hub does not run triage yet, so summaries appear only if the backend already has them."
+            checked={values.useAiTriage}
             onChange={(v) => set("useAiTriage", v)}
-            disabled={!AI_TRIAGE_AVAILABLE}
-            badge={
-              AI_TRIAGE_AVAILABLE ? null : (
-                <span className="rounded border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground">Unavailable</span>
-              )
-            }
           />
         </div>
       </Panel>
