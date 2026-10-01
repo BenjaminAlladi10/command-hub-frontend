@@ -9,50 +9,254 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated.index'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedCommandsIndexRouteImport } from './routes/_authenticated.commands.index'
+import { Route as AuthenticatedCommandsNameRouteImport } from './routes/_authenticated.commands.$name'
+import { Route as AuthenticatedGuildsIndexRouteImport } from './routes/_authenticated.guilds.index'
+import { Route as AuthenticatedGuildsGuildIdRouteImport } from './routes/_authenticated.guilds.$guildId'
+import { Route as AuthenticatedInteractionsIndexRouteImport } from './routes/_authenticated.interactions.index'
+import { Route as AuthenticatedInteractionsIdRouteImport } from './routes/_authenticated.interactions.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCommandsIndexRoute =
+  AuthenticatedCommandsIndexRouteImport.update({
+    id: '/commands/',
+    path: '/commands/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCommandsNameRoute =
+  AuthenticatedCommandsNameRouteImport.update({
+    id: '/commands/$name',
+    path: '/commands/$name',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedGuildsIndexRoute =
+  AuthenticatedGuildsIndexRouteImport.update({
+    id: '/guilds/',
+    path: '/guilds/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedGuildsGuildIdRoute =
+  AuthenticatedGuildsGuildIdRouteImport.update({
+    id: '/guilds/$guildId',
+    path: '/guilds/$guildId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedInteractionsIndexRoute =
+  AuthenticatedInteractionsIndexRouteImport.update({
+    id: '/interactions/',
+    path: '/interactions/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedInteractionsIdRoute =
+  AuthenticatedInteractionsIdRouteImport.update({
+    id: '/interactions/$id',
+    path: '/interactions/$id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/login': typeof LoginRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/commands/$name': typeof AuthenticatedCommandsNameRoute
+  '/guilds/$guildId': typeof AuthenticatedGuildsGuildIdRoute
+  '/interactions/$id': typeof AuthenticatedInteractionsIdRoute
+  '/commands/': typeof AuthenticatedCommandsIndexRoute
+  '/guilds/': typeof AuthenticatedGuildsIndexRoute
+  '/interactions/': typeof AuthenticatedInteractionsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/commands/$name': typeof AuthenticatedCommandsNameRoute
+  '/guilds/$guildId': typeof AuthenticatedGuildsGuildIdRoute
+  '/interactions/$id': typeof AuthenticatedInteractionsIdRoute
+  '/commands': typeof AuthenticatedCommandsIndexRoute
+  '/guilds': typeof AuthenticatedGuildsIndexRoute
+  '/interactions': typeof AuthenticatedInteractionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/commands/$name': typeof AuthenticatedCommandsNameRoute
+  '/_authenticated/guilds/$guildId': typeof AuthenticatedGuildsGuildIdRoute
+  '/_authenticated/interactions/$id': typeof AuthenticatedInteractionsIdRoute
+  '/_authenticated/commands/': typeof AuthenticatedCommandsIndexRoute
+  '/_authenticated/guilds/': typeof AuthenticatedGuildsIndexRoute
+  '/_authenticated/interactions/': typeof AuthenticatedInteractionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/settings'
+    | '/commands/$name'
+    | '/guilds/$guildId'
+    | '/interactions/$id'
+    | '/commands/'
+    | '/guilds/'
+    | '/interactions/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/login'
+    | '/settings'
+    | '/'
+    | '/commands/$name'
+    | '/guilds/$guildId'
+    | '/interactions/$id'
+    | '/commands'
+    | '/guilds'
+    | '/interactions'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/login'
+    | '/_authenticated/settings'
+    | '/_authenticated/'
+    | '/_authenticated/commands/$name'
+    | '/_authenticated/guilds/$guildId'
+    | '/_authenticated/interactions/$id'
+    | '/_authenticated/commands/'
+    | '/_authenticated/guilds/'
+    | '/_authenticated/interactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/commands/': {
+      id: '/_authenticated/commands/'
+      path: '/commands'
+      fullPath: '/commands/'
+      preLoaderRoute: typeof AuthenticatedCommandsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/commands/$name': {
+      id: '/_authenticated/commands/$name'
+      path: '/commands/$name'
+      fullPath: '/commands/$name'
+      preLoaderRoute: typeof AuthenticatedCommandsNameRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/guilds/': {
+      id: '/_authenticated/guilds/'
+      path: '/guilds'
+      fullPath: '/guilds/'
+      preLoaderRoute: typeof AuthenticatedGuildsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/guilds/$guildId': {
+      id: '/_authenticated/guilds/$guildId'
+      path: '/guilds/$guildId'
+      fullPath: '/guilds/$guildId'
+      preLoaderRoute: typeof AuthenticatedGuildsGuildIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/interactions/': {
+      id: '/_authenticated/interactions/'
+      path: '/interactions'
+      fullPath: '/interactions/'
+      preLoaderRoute: typeof AuthenticatedInteractionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/interactions/$id': {
+      id: '/_authenticated/interactions/$id'
+      path: '/interactions/$id'
+      fullPath: '/interactions/$id'
+      preLoaderRoute: typeof AuthenticatedInteractionsIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCommandsNameRoute: typeof AuthenticatedCommandsNameRoute
+  AuthenticatedGuildsGuildIdRoute: typeof AuthenticatedGuildsGuildIdRoute
+  AuthenticatedInteractionsIdRoute: typeof AuthenticatedInteractionsIdRoute
+  AuthenticatedCommandsIndexRoute: typeof AuthenticatedCommandsIndexRoute
+  AuthenticatedGuildsIndexRoute: typeof AuthenticatedGuildsIndexRoute
+  AuthenticatedInteractionsIndexRoute: typeof AuthenticatedInteractionsIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCommandsNameRoute: AuthenticatedCommandsNameRoute,
+  AuthenticatedGuildsGuildIdRoute: AuthenticatedGuildsGuildIdRoute,
+  AuthenticatedInteractionsIdRoute: AuthenticatedInteractionsIdRoute,
+  AuthenticatedCommandsIndexRoute: AuthenticatedCommandsIndexRoute,
+  AuthenticatedGuildsIndexRoute: AuthenticatedGuildsIndexRoute,
+  AuthenticatedInteractionsIndexRoute: AuthenticatedInteractionsIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

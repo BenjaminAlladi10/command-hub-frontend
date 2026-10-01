@@ -20,11 +20,3 @@ export function useUpdateGuild() {
     },
   });
 }
-
-export function useInviteUrl() {
-  return useQuery({
-    queryKey: queryKeys.guilds.inviteUrl(),
-    queryFn: () => guildsApi.getInviteUrl(),
-    staleTime: 5 * 60_000,
-  });
-}

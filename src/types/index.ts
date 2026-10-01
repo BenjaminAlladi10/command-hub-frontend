@@ -29,8 +29,6 @@ export interface Interaction {
   status: InteractionStatus;
   receivedAt: string;
   actions: Action[];
-  aiSummary?: string;
-  aiTags?: string[];
 }
 
 export interface CommandRule {
@@ -42,6 +40,7 @@ export interface CommandRule {
 
 export interface CommandConfig {
   guildId: string;
+  /** Slash command name including the leading slash, e.g. "/hello". */
   name: string;
   enabled: boolean;
   rule: CommandRule;
@@ -57,16 +56,17 @@ export interface Guild {
   name: string;
   channelId: string;
   channels: GuildChannel[];
+  /** The webhook URL itself is never returned by the backend. */
   mirrorConfigured: boolean;
   connectedAt: string;
 }
 
 export interface Stats {
-  total24h: number;
-  successRate: number;
-  failedCount: number;
-  pendingRetries: number;
-  byCommand: { command: string; count: number }[];
+  totalInteractions: number;
+  successfulInteractions: number;
+  failedInteractions: number;
+  totalCommands: number;
+  totalMirrors: number;
 }
 
 export interface InteractionQuery {

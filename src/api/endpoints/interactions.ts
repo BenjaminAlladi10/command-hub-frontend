@@ -2,7 +2,7 @@ import { request, USE_MOCK } from "@/api/client";
 import { getDb, latency, maybeFail, requireSession } from "@/api/mock/store";
 import { ApiError } from "@/lib/api-error";
 import { PAGE_SIZE } from "@/lib/constants";
-import type { Action, Interaction, InteractionPage, InteractionQuery } from "@/types";
+import type { Interaction, InteractionPage, InteractionQuery } from "@/types";
 
 function buildSearch(query: InteractionQuery): string {
   const params = new URLSearchParams();
@@ -21,7 +21,7 @@ export async function listInteractions(query: InteractionQuery): Promise<Interac
 
   await latency();
   requireSession();
-  maybeFail(0.04);
+  maybeFail(0.03);
 
   const limit = query.limit ?? PAGE_SIZE;
   const needle = query.q?.trim().toLowerCase();
@@ -48,41 +48,11 @@ export async function listInteractions(query: InteractionQuery): Promise<Interac
 }
 
 export async function getInteraction(id: string): Promise<Interaction> {
-  if (!USE_MOCK) return request(`/api/interactions/${id}`);
+  if (!USE_MOCK) return request(`/api/interactions/${encodeURIComponent(id)}`);
 
   await latency();
   requireSession();
   const found = getDb().interactions.find((i) => i.id === id);
   if (!found) throw new ApiError(404, "Interaction not found");
   return structuredClone(found);
-}
-
-export async function retryAction(actionId: string): Promise<Action> {
-  if (!USE_MOCK) return request(`/api/actions/${actionId}/retry`, { method: "POST" });
-
-  await latency(500, 1100);
-  requireSession();
-
-  const db = getDb();
-  for (const interaction of db.interactions) {
-    const action = interaction.actions.find((a) => a.id === actionId);
-    if (!action) continue;
-
-    action.attempts += 1;
-    action.updatedAt = new Date().toISOString();
-    const succeeded = Math.random() < 0.7;
-    if (succeeded) {
-      action.status = "success";
-      action.lastError = null;
-      action.nextRetryAt = null;
-      if (interaction.actions.every((a) => a.status === "success")) interaction.status = "replied";
-    } else {
-      action.status = "failed";
-      action.lastError = "Mirror webhook responded 500";
-      action.nextRetryAt = new Date(Date.now() + 120_000).toISOString();
-      throw new ApiError(502, "Retry failed: mirror webhook responded 500");
-    }
-    return structuredClone(action);
-  }
-  throw new ApiError(404, "Action not found");
 }

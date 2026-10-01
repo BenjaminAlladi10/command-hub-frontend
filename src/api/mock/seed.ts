@@ -46,21 +46,15 @@ const USERNAMES = [
   "sam.okafor",
 ];
 
-const REPORT_TEXTS = [
-  "Spam links being posted in #lobby by a new account",
-  "User impersonating a moderator in DMs",
-  "Voice channel raid started about five minutes ago",
-  "Someone is posting NSFW images in #general",
-  "Repeated harassment after a mute expired",
-  "Bot command loop flooding the reports channel",
+const NOTIFY_TEXTS = [
+  "Checkout API is down for EU customers",
+  "Deploy 4.12 rolled out to production",
+  "Critical: payment webhook failing since 09:40",
+  "Urgent: database replica lag above 30s",
+  "Scheduled maintenance tonight at 22:00 UTC",
 ];
 
-const STATUS_TEXTS = [
-  "checking queue depth",
-  "mirror health",
-  "latency check",
-  "uptime since last deploy",
-];
+const HELLO_TEXTS = ["hi there", "testing the bot", "hello from mobile", ""];
 
 const ERRORS = [
   "Discord API 503: service unavailable",
@@ -73,10 +67,8 @@ export interface MockDb {
   user: User;
   password: string;
   guilds: Guild[];
-  mirrorSecrets: Record<string, string>;
   commands: CommandConfig[];
   interactions: Interaction[];
-  inviteUrl: string;
 }
 
 function pick<T>(rand: () => number, list: readonly T[]): T {
@@ -99,12 +91,10 @@ export function createMockDb(): MockDb {
       enabled: true,
       rule: {
         replyTemplate:
-          name === "/report"
-            ? "Thanks {user}, your report has been logged and the moderators were notified."
-            : "Status for {user}: {text}",
-        mirror: name === "/report",
-        flagKeywords: name === "/report" ? ["raid", "nsfw", "doxx"] : [],
-        useAiTriage: name === "/report",
+          name === "/notify" ? "Notification received: {{text}}" : "Hello! You said: {{text}}",
+        mirror: name === "/notify",
+        flagKeywords: name === "/notify" ? ["urgent", "critical", "down"] : [],
+        useAiTriage: false,
       },
     })),
   );
@@ -118,7 +108,7 @@ export function createMockDb(): MockDb {
     const status = roll < 0.12 ? "failed" : roll < 0.2 ? "received" : "replied";
     const id = `int_${(100000 + i).toString(36)}${i}`;
     const text =
-      command === "/report" ? pick(rand, REPORT_TEXTS) : pick(rand, STATUS_TEXTS);
+      command === "/notify" ? pick(rand, NOTIFY_TEXTS) : pick(rand, HELLO_TEXTS);
 
     const actions: Action[] = [];
     const mkAction = (
@@ -147,7 +137,7 @@ export function createMockDb(): MockDb {
       actions.push(mkAction("reply", "pending", 0, null));
     } else {
       actions.push(mkAction("reply", "success", 1, null));
-      if (command === "/report") actions.push(mkAction("mirror", "success", 1, null));
+      if (command === "/notify") actions.push(mkAction("mirror", "success", 1, null));
     }
 
     const interaction: Interaction = {
@@ -163,13 +153,6 @@ export function createMockDb(): MockDb {
       actions,
     };
 
-    if (command === "/report" && rand() < 0.65) {
-      actions.push(mkAction("ai", "success", 1, null));
-      interaction.aiSummary =
-        "Member reports disruptive behaviour affecting a public channel; moderator review recommended.";
-      interaction.aiTags = ["moderation", rand() < 0.5 ? "high-priority" : "spam"];
-    }
-
     interactions.push(interaction);
   }
 
@@ -177,10 +160,7 @@ export function createMockDb(): MockDb {
     user: { id: "usr_admin", email: "admin@commandhub.dev" },
     password: "admin123",
     guilds,
-    mirrorSecrets: { "912440311220": "configured" },
     commands,
     interactions,
-    inviteUrl:
-      "https://discord.com/oauth2/authorize?client_id=1180000000000000000&scope=bot+applications.commands&permissions=277025508352",
   };
 }
